@@ -1,11 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
 import { z } from "zod";
 import authConfig from "@/auth.config";
-import { db } from "@/src/db";
-import { users } from "@/src/db/schema";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -14,6 +11,8 @@ const credentialsSchema = z.object({
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  trustHost: true,
   providers: [
     Credentials({
       credentials: {
@@ -25,6 +24,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!parsed.success) {
           return null;
         }
+
+        const [{ eq }, { db }, { users }] = await Promise.all([
+          import("drizzle-orm"),
+          import("@/src/db"),
+          import("@/src/db/schema"),
+        ]);
 
         const [user] = await db
           .select()
