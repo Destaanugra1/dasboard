@@ -1,5 +1,5 @@
-import { db } from "./src/db/index.ts";
-import { products } from "./src/db/schema.ts";
+import { db } from "./src/db/index";
+import { products } from "./src/db/schema";
 
 async function run() {
   const allProducts = await db.select().from(products);
