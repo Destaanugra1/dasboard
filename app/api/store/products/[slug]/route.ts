@@ -5,12 +5,12 @@ import { eq, sql } from "drizzle-orm";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { slug: string } }
 ) {
   try {
-    const id = parseInt(params.id, 10);
-    if (isNaN(id)) {
-      return NextResponse.json({ error: "Invalid product ID" }, { status: 400 });
+    const slug = params.slug;
+    if (!slug) {
+      return NextResponse.json({ error: "Invalid product slug" }, { status: 400 });
     }
 
     const salesSubquery = db
@@ -40,7 +40,7 @@ export async function GET(
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
       .leftJoin(salesSubquery, eq(products.id, salesSubquery.productId))
-      .where(eq(products.id, id))
+      .where(eq(products.slug, slug))
       .limit(1);
 
     if (!row) {

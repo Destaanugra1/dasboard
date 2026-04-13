@@ -20,6 +20,7 @@ export async function GET() {
       .select({
         id: products.id,
         title: products.name,
+        slug: products.slug,
         description: products.description,
         price: products.price,
         imageUrl: products.imageUrl,
@@ -48,6 +49,7 @@ export async function GET() {
       return {
         id: row.id,
         title: row.title,
+        slug: row.slug,
         description: row.description || "",
         category: row.category || "GENERAL",
         price,
