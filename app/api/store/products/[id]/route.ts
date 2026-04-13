@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/src/db";
-import { products, categories } from "@/src/db/schema";
-import { eq } from "drizzle-orm";
+import { products, categories, orders, orderItems } from "@/src/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 export async function GET(
   _req: Request,
@@ -12,6 +12,17 @@ export async function GET(
     if (isNaN(id)) {
       return NextResponse.json({ error: "Invalid product ID" }, { status: 400 });
     }
+
+    const salesSubquery = db
+      .select({
+        productId: orderItems.productId,
+        salesCount: sql<number>`coalesce(sum(${orderItems.quantity}), 0)`.as('sales_count'),
+      })
+      .from(orderItems)
+      .leftJoin(orders, eq(orderItems.orderId, orders.id))
+      .where(eq(orders.status, "success"))
+      .groupBy(orderItems.productId)
+      .as("salesSubquery");
 
     const [row] = await db
       .select({
@@ -24,9 +35,11 @@ export async function GET(
         discountPct: products.discountPct,
         categoryName: categories.name,
         status: products.status,
+        salesCount: sql<number>`coalesce(${salesSubquery.salesCount}, 0)`,
       })
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
+      .leftJoin(salesSubquery, eq(products.id, salesSubquery.productId))
       .where(eq(products.id, id))
       .limit(1);
 
@@ -59,6 +72,7 @@ export async function GET(
         fileUrl: row.fileUrl || null,
         badge: price === 0 ? "Free" : "Pro",
         status: row.status,
+        salesCount: Number(row.salesCount),
       },
     });
   } catch (err: any) {

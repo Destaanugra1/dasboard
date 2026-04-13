@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
 import { db } from "@/src/db";
-import { products, categories } from "@/src/db/schema";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, desc, sum, sql } from "drizzle-orm";
+import { products, categories, orders, orderItems } from "@/src/db/schema";
 
 export async function GET() {
   try {
+    const salesSubquery = db
+      .select({
+        productId: orderItems.productId,
+        salesCount: sql<number>`coalesce(sum(${orderItems.quantity}), 0)`.as('sales_count'),
+      })
+      .from(orderItems)
+      .leftJoin(orders, eq(orderItems.orderId, orders.id))
+      .where(eq(orders.status, "success"))
+      .groupBy(orderItems.productId)
+      .as("salesSubquery");
+
     const rows = await db
       .select({
         id: products.id,
@@ -15,11 +26,13 @@ export async function GET() {
         fileUrl: products.fileUrl,
         discountPct: products.discountPct,
         category: categories.name,
+        salesCount: sql<number>`coalesce(${salesSubquery.salesCount}, 0)`,
       })
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
+      .leftJoin(salesSubquery, eq(products.id, salesSubquery.productId))
       .where(eq(products.status, "active"))
-      .orderBy(asc(products.id));
+      .orderBy(desc(sql`coalesce(${salesSubquery.salesCount}, 0)`), asc(products.id));
 
     const data = rows.map((row) => {
       const price = Number(row.price);
@@ -40,6 +53,7 @@ export async function GET() {
         price,
         finalPrice,
         discountPct,
+        salesCount: Number(row.salesCount),
         imageUrl: imageUrls[0] || null,
         imageUrls,
         fileUrl: row.fileUrl || null,
