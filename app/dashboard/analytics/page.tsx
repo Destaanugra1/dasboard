@@ -13,6 +13,7 @@ export default async function AnalyticsPage() {
       total: sql<string>`coalesce(sum(${orders.total}), 0)`,
     })
     .from(orders)
+    .where(eq(orders.status, "success"))
     .groupBy(sql`date_trunc('month', ${orders.createdAt})`)
     .orderBy(sql`date_trunc('month', ${orders.createdAt}) asc`);
 
@@ -22,6 +23,7 @@ export default async function AnalyticsPage() {
       total: sql<string>`count(*)`,
     })
     .from(orders)
+    .where(eq(orders.status, "success"))
     .groupBy(sql`date_trunc('week', ${orders.createdAt})`)
     .orderBy(sql`date_trunc('week', ${orders.createdAt}) asc`);
 
@@ -36,7 +38,10 @@ export default async function AnalyticsPage() {
     .orderBy(sql`coalesce(sum(${orderItems.quantity}), 0) desc`)
     .limit(5);
 
-  const [ordersCount] = await db.select({ value: sql<string>`count(*)` }).from(orders);
+  const [ordersCount] = await db
+    .select({ value: sql<string>`count(*)` })
+    .from(orders)
+    .where(eq(orders.status, "success"));
   const [usersCount] = await db.select({ value: sql<string>`count(*)` }).from(users);
   const [activeProducts] = await db
     .select({ value: sql<string>`count(*)` })

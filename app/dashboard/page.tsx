@@ -9,9 +9,13 @@ import { TopProductsCard } from "@/components/dashboard/top-products-card";
 export default async function DashboardOverviewPage() {
   const [revenueAgg] = await db
     .select({ value: sql<string>`coalesce(sum(${orders.total}), 0)` })
-    .from(orders);
+    .from(orders)
+    .where(eq(orders.status, "success"));
 
-  const [ordersAgg] = await db.select({ value: sql<string>`count(*)` }).from(orders);
+  const [ordersAgg] = await db
+    .select({ value: sql<string>`count(*)` })
+    .from(orders)
+    .where(eq(orders.status, "success"));
   const [usersAgg] = await db.select({ value: sql<string>`count(*)` }).from(users);
   const [productsAgg] = await db
     .select({ value: sql<string>`count(*)` })
@@ -24,7 +28,7 @@ export default async function DashboardOverviewPage() {
       total: sql<string>`coalesce(sum(${orders.total}), 0)`,
     })
     .from(orders)
-    .where(sql`${orders.createdAt} >= now() - interval '30 days'`)
+    .where(sql`${orders.status} = 'success' AND ${orders.createdAt} >= now() - interval '30 days'`)
     .groupBy(sql`to_char(${orders.createdAt}, 'MM/DD')`)
     .orderBy(sql`to_char(${orders.createdAt}, 'MM/DD') asc`);
 
@@ -34,8 +38,10 @@ export default async function DashboardOverviewPage() {
       status: orders.status,
       total: orders.total,
       createdAt: orders.createdAt,
-      userName: users.name,
-      userEmail: users.email,
+      userName: orders.customerName,
+      userEmail: orders.customerEmail,
+      accountName: users.name,
+      accountEmail: users.email,
     })
     .from(orders)
     .leftJoin(users, eq(orders.userId, users.id))
@@ -101,8 +107,8 @@ export default async function DashboardOverviewPage() {
                 <tr key={order.id} className="border-t border-white/5 text-textPrimary">
                   <td className="px-2 py-2">#{order.id}</td>
                   <td className="px-2 py-2">
-                    <p>{order.userName ?? "Unknown"}</p>
-                    <p className="text-xs text-muted">{order.userEmail ?? ""}</p>
+                    <p>{order.userName ?? order.accountName ?? "Unknown"}</p>
+                    <p className="text-xs text-muted">{order.userEmail ?? order.accountEmail ?? ""}</p>
                   </td>
                   <td className="px-2 py-2 capitalize">{order.status}</td>
                   <td className="px-2 py-2">{toCurrency(order.total)}</td>

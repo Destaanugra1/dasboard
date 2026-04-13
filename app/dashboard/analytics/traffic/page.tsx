@@ -22,7 +22,7 @@ export default async function AnalyticsTrafficPage() {
         total: sql<string>`count(*)`,
       })
       .from(orders)
-      .where(sql`${orders.createdAt} >= now() - interval '14 days'`)
+      .where(sql`${orders.status} = 'success' AND ${orders.createdAt} >= now() - interval '14 days'`)
       .groupBy(sql`date_trunc('day', ${orders.createdAt})`)
       .orderBy(sql`date_trunc('day', ${orders.createdAt}) asc`),
   ]);

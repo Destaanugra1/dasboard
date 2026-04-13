@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toCurrency, toDate } from "@/src/lib/format";
+import { formatCurrency } from "@/src/lib/currency";
 
 type Role = "admin" | "staff" | "viewer";
 type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returned" | "success" | "failed";
@@ -9,10 +10,11 @@ type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returne
 type OrderRow = {
   id: number;
   status: OrderStatus;
-  total: string;
+  total: number;
   createdAt: string;
   userName: string | null;
   userEmail: string | null;
+  order: number;
 };
 
 type OrderDetail = {
@@ -153,7 +155,7 @@ export function OrdersManager({ role }: { role: Role }) {
                     <p className="text-textPrimary">{order.userName ?? "Unknown"}</p>
                     <p className="text-xs text-muted">{order.userEmail ?? ""}</p>
                   </td>
-                  <td className="px-3 py-2 text-textPrimary">{toCurrency(order.total)}</td>
+                  <td className="px-3 py-2 text-textPrimary">{formatCurrency(order.total)}</td>
                   <td className="px-3 py-2 capitalize text-textPrimary">{order.status}</td>
                   <td className="px-3 py-2 text-textPrimary">{toDate(order.createdAt)}</td>
                   <td className="px-3 py-2">
