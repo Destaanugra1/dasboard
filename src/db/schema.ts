@@ -54,7 +54,11 @@ export const products = pgTable("products", {
 
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }), // Nullable for guest checkouts
+  customerName: varchar("customer_name", { length: 120 }), // For guest checkouts
+  customerEmail: varchar("customer_email", { length: 255 }), // For guest checkouts
+  externalId: varchar("external_id", { length: 255 }), // Xendit external reference ID
+  paymentQrString: text("payment_qr_string"), // To store raw QR string
   status: orderStatusEnum("status").notNull().default("pending"),
   total: numeric("total", { precision: 12, scale: 2 }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
