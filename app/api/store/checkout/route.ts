@@ -27,12 +27,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
     const product = productList[0];
+    const basePrice = Number(product.price);
+    const discountPct = product.discountPct ?? 0;
+    const finalPrice = discountPct > 0 ? Math.round(basePrice * (1 - discountPct / 100)) : basePrice;
 
     // Insert Order (Pending)
     const newOrder = await db.insert(orders).values({
       customerName,
       customerEmail,
-      total: product.price,
+      total: String(finalPrice),
       status: "pending",
     }).returning();
     const order = newOrder[0];
@@ -51,7 +54,7 @@ export async function POST(req: Request) {
     let parameter: any = {
       transaction_details: {
         order_id: externalId,
-        gross_amount: Math.round(Number(product.price))
+        gross_amount: finalPrice
       },
       customer_details: {
         first_name: customerName,

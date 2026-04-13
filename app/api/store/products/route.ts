@@ -9,7 +9,11 @@ export async function GET() {
       .select({
         id: products.id,
         title: products.name,
+        description: products.description,
         price: products.price,
+        imageUrl: products.imageUrl,
+        fileUrl: products.fileUrl,
+        discountPct: products.discountPct,
         category: categories.name,
       })
       .from(products)
@@ -18,14 +22,30 @@ export async function GET() {
       .orderBy(asc(products.id));
 
     const data = rows.map((row) => {
+      const price = Number(row.price);
+      const discountPct = row.discountPct ?? 0;
+      const finalPrice = discountPct > 0 ? Math.round(price * (1 - discountPct / 100)) : price;
+      // Parse imageUrl as JSON array or comma-separated
+      let imageUrls: string[] = [];
+      if (row.imageUrl) {
+        try { imageUrls = JSON.parse(row.imageUrl); } catch {
+          imageUrls = row.imageUrl.split(",").map((s) => s.trim()).filter(Boolean);
+        }
+      }
       return {
         id: row.id,
         title: row.title,
+        description: row.description || "",
         category: row.category || "GENERAL",
-        price: Number(row.price),
-        badge: Number(row.price) === 0 ? "Free" : "Pro",
+        price,
+        finalPrice,
+        discountPct,
+        imageUrl: imageUrls[0] || null,
+        imageUrls,
+        fileUrl: row.fileUrl || null,
+        badge: price === 0 ? "Free" : "Pro",
         isNew: false,
-        bg: "#1e1b4b", // Default background color for template cards
+        bg: "#1e1b4b",
       };
     });
 

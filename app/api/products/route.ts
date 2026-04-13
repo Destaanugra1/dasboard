@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
       stock: products.stock,
       status: products.status,
       imageUrl: products.imageUrl,
+      discountPct: products.discountPct,
       categoryId: products.categoryId,
       categoryName: categories.name,
       fileUrl: products.fileUrl,
@@ -55,6 +56,7 @@ export async function GET(request: NextRequest) {
     ...row,
     imageUrl: firstProductImage(row.imageUrl),
     imageUrls: parseProductImages(row.imageUrl),
+    discountPct: row.discountPct ?? 0,
   }));
 
   const totalResult = await db.select({ value: count() }).from(products).where(whereClause);
@@ -86,6 +88,7 @@ export async function POST(request: NextRequest) {
     imageUrl?: string;
     imageUrls?: string[];
     fileUrl?: string;
+    discountPct?: number;
     status?: ProductStatus;
   };
 
@@ -110,6 +113,7 @@ export async function POST(request: NextRequest) {
       categoryId: body.categoryId ?? null,
       imageUrl: serializeProductImages(resolvedImages),
       fileUrl: body.fileUrl,
+      discountPct: body.discountPct ?? 0,
       status: body.status ?? "active",
     })
     .returning();

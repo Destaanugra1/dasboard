@@ -70,6 +70,7 @@ type FormState = {
   status: ProductStatus;
   imageUrls: string[];
   fileUrl: string;
+  discountPct: string;
 };
 
 const EMPTY_FORM: FormState = {
@@ -81,6 +82,7 @@ const EMPTY_FORM: FormState = {
   status: "active",
   imageUrls: [],
   fileUrl: "",
+  discountPct: "0",
 };
 
 export function ProductsManager({
@@ -188,6 +190,7 @@ export function ProductsManager({
       categoryId: product.categoryId ? String(product.categoryId) : "",
       status: product.status,
       fileUrl: product.fileUrl ?? "",
+      discountPct: String(product.discountPct ?? 0),
       imageUrls:
         product.imageUrls && product.imageUrls.length > 0
           ? product.imageUrls
@@ -265,6 +268,7 @@ export function ProductsManager({
       imageUrls: form.imageUrls,
       status: form.status,
       fileUrl: form.fileUrl,
+      discountPct: Number(form.discountPct),
     };
 
     const endpoint = editingId ? `/api/products/${editingId}` : "/api/products";
@@ -536,6 +540,22 @@ export function ProductsManager({
                 placeholder="Link Download Template (Google Drive, dll)"
                 className="glass-card px-3 py-2 text-sm md:col-span-2"
               />
+              {/* Discount – only show when editing */}
+              {editingId !== null && (
+                <div className="glass-card px-3 py-3 md:col-span-2 space-y-1">
+                  <p className="text-sm font-medium text-textPrimary">Diskon (%)</p>
+                  <p className="text-xs text-muted">Masukkan angka 0–100. Harga asli akan dicoret di storefront.</p>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={form.discountPct}
+                    onChange={(event) => setForm((value) => ({ ...value, discountPct: event.target.value }))}
+                    placeholder="0"
+                    className="glass-card px-3 py-2 text-sm w-32"
+                  />
+                </div>
+              )}
               <select
                 value={form.categoryId}
                 onChange={(event) => setForm((value) => ({ ...value, categoryId: event.target.value }))}

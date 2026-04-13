@@ -51,6 +51,7 @@ export const products = pgTable("products", {
   categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
   imageUrl: text("image_url"),
   fileUrl: text("file_url"),
+  discountPct: integer("discount_pct").notNull().default(0),
   status: productStatusEnum("status").notNull().default("active"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
