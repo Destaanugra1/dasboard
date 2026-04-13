@@ -24,6 +24,7 @@ type ProductRow = {
   categoryName: string | null;
   createdAt: string;
   fileUrl: string | null;
+  discountPct: number | null;
 };
 
 type UploadInfo = {
