@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toCurrency, toDate } from "@/src/lib/format";
 
 type Role = "admin" | "staff" | "viewer";
-type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returned";
+type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returned" | "success" | "failed";
 
 type OrderRow = {
   id: number;
@@ -112,6 +112,8 @@ export function OrdersManager({ role }: { role: Role }) {
             <option value="shipped">Shipped</option>
             <option value="delivered">Delivered</option>
             <option value="returned">Returned</option>
+            <option value="success">Success</option>
+            <option value="failed">Failed</option>
           </select>
         </div>
       </div>
@@ -216,7 +218,7 @@ export function OrdersManager({ role }: { role: Role }) {
                 <div className="mt-5">
                   <p className="mb-2 text-sm text-muted">Update Status</p>
                   <div className="flex flex-wrap gap-2">
-                    {["pending", "processing", "shipped", "delivered", "returned"].map((option) => (
+                    {["pending", "processing", "shipped", "delivered", "returned", "success", "failed"].map((option) => (
                       <button
                         key={option}
                         type="button"

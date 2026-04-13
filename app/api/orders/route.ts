@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, asc, count, eq } from "drizzle-orm";
+import { and, desc, count, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/src/db";
 import { orders, users } from "@/src/db/schema";
 
-type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returned";
+type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returned" | "success" | "failed";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -27,20 +27,30 @@ export async function GET(request: NextRequest) {
       status: orders.status,
       total: orders.total,
       createdAt: orders.createdAt,
-      userName: users.name,
-      userEmail: users.email,
+      userName: orders.customerName,
+      userEmail: orders.customerEmail,
+      // fallback if customerName is null but user is linked (rare/legacy)
+      accountName: users.name,
+      accountEmail: users.email,
     })
     .from(orders)
     .leftJoin(users, eq(orders.userId, users.id))
     .where(whereClause)
-    .orderBy(asc(orders.id))
+    .orderBy(desc(orders.id))
     .limit(pageSize)
     .offset((page - 1) * pageSize);
 
   const totalResult = await db.select({ value: count() }).from(orders).where(whereClause);
 
+  // map the fallback
+  const mappedData = data.map((row) => ({
+    ...row,
+    userName: row.userName || row.accountName,
+    userEmail: row.userEmail || row.accountEmail,
+  }));
+
   return NextResponse.json({
-    data,
+    data: mappedData,
     page,
     pageSize,
     total: totalResult[0]?.value ?? 0,

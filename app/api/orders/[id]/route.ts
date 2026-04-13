@@ -5,7 +5,7 @@ import { db } from "@/src/db";
 import { orderItems, orders, products, users } from "@/src/db/schema";
 import { canWrite } from "@/src/lib/authz";
 
-type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returned";
+type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returned" | "success" | "failed";
 
 export async function GET(_request: NextRequest, context: { params: { id: string } }) {
   const session = await auth();
@@ -24,8 +24,10 @@ export async function GET(_request: NextRequest, context: { params: { id: string
       status: orders.status,
       total: orders.total,
       createdAt: orders.createdAt,
-      userName: users.name,
-      userEmail: users.email,
+      userName: orders.customerName,
+      userEmail: orders.customerEmail,
+      accountName: users.name,
+      accountEmail: users.email,
     })
     .from(orders)
     .leftJoin(users, eq(orders.userId, users.id))
@@ -48,7 +50,13 @@ export async function GET(_request: NextRequest, context: { params: { id: string
     .leftJoin(products, eq(orderItems.productId, products.id))
     .where(eq(orderItems.orderId, id));
 
-  return NextResponse.json({ data: { ...order, items } });
+  const mappedOrder = {
+    ...order,
+    userName: order.userName || order.accountName,
+    userEmail: order.userEmail || order.accountEmail,
+  };
+
+  return NextResponse.json({ data: { ...mappedOrder, items } });
 }
 
 export async function PUT(request: NextRequest, context: { params: { id: string } }) {
