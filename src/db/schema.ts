@@ -8,6 +8,7 @@ import {
   text,
   timestamp,
   varchar,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", ["admin", "staff", "viewer"]);
@@ -53,6 +54,14 @@ export const products = pgTable("products", {
   fileUrl: text("file_url"),
   discountPct: integer("discount_pct").notNull().default(0),
   status: productStatusEnum("status").notNull().default("active"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const banners = pgTable("banners", {
+  id: serial("id").primaryKey(),
+  desktopImageUrl: text("desktop_image_url").notNull(),
+  mobileImageUrl: text("mobile_image_url").notNull(),
+  isActive: boolean("is_active").default(false).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
