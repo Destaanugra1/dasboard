@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
@@ -497,55 +497,90 @@ export function ProductsManager({
 
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <form onSubmit={submitForm} className="glass-card w-full max-w-2xl space-y-3 p-5">
-            <h3 className="text-lg font-semibold text-textPrimary">
-              {editingId ? "Edit Product" : "Create Product"}
-            </h3>
-            <div className="grid gap-3 md:grid-cols-2">
-              <input
-                required
-                value={form.name}
-                onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))}
-                placeholder="Name"
-                className="glass-card px-3 py-2 text-sm"
-              />
-              <input
-                required
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.price}
-                onChange={(event) => setForm((value) => ({ ...value, price: event.target.value }))}
-                placeholder="Price"
-                className="glass-card px-3 py-2 text-sm"
-              />
+          <form onSubmit={submitForm} className="glass-card w-full max-w-xl flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+              <h3 className="text-sm font-semibold text-textPrimary">
+                {editingId ? "Edit Product" : "Create Product"}
+              </h3>
+              <button type="button" onClick={() => setOpen(false)} className="text-muted hover:text-textPrimary text-lg leading-none">✕</button>
+            </div>
+
+            {/* Scrollable body */}
+            <div className="overflow-y-auto px-4 py-3 space-y-2.5 flex-1">
+              {/* Row 1: Name + Price */}
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  required
+                  value={form.name}
+                  onChange={(event) => setForm((value) => ({ ...value, name: event.target.value }))}
+                  placeholder="Nama produk"
+                  className="glass-card px-3 py-1.5 text-xs"
+                />
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.price}
+                  onChange={(event) => setForm((value) => ({ ...value, price: event.target.value }))}
+                  placeholder="Harga (Rp)"
+                  className="glass-card px-3 py-1.5 text-xs"
+                />
+              </div>
+
+              {/* Row 2: Description */}
               <textarea
                 value={form.description}
-                onChange={(event) =>
-                  setForm((value) => ({ ...value, description: event.target.value }))
-                }
-                placeholder="Description"
-                className="glass-card min-h-20 px-3 py-2 text-sm md:col-span-2"
+                onChange={(event) => setForm((value) => ({ ...value, description: event.target.value }))}
+                placeholder="Deskripsi (opsional)"
+                rows={2}
+                className="glass-card w-full px-3 py-1.5 text-xs resize-none"
               />
-              <input
-                type="number"
-                min="0"
-                value={form.stock}
-                onChange={(event) => setForm((value) => ({ ...value, stock: event.target.value }))}
-                placeholder="Stock"
-                className="glass-card px-3 py-2 text-sm"
-              />
+
+              {/* Row 3: Stock + Category + Status */}
+              <div className="grid grid-cols-3 gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  value={form.stock}
+                  onChange={(event) => setForm((value) => ({ ...value, stock: event.target.value }))}
+                  placeholder="Stok"
+                  className="glass-card px-3 py-1.5 text-xs"
+                />
+                <select
+                  value={form.categoryId}
+                  onChange={(event) => setForm((value) => ({ ...value, categoryId: event.target.value }))}
+                  className="glass-card px-3 py-1.5 text-xs"
+                >
+                  <option value="">No Category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                </select>
+                <select
+                  value={form.status}
+                  onChange={(event) => setForm((value) => ({ ...value, status: event.target.value as ProductStatus }))}
+                  className="glass-card px-3 py-1.5 text-xs"
+                >
+                  <option value="active">Active</option>
+                  <option value="draft">Draft</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+
+              {/* Row 4: Download link */}
               <input
                 value={form.fileUrl}
                 onChange={(event) => setForm((value) => ({ ...value, fileUrl: event.target.value }))}
-                placeholder="Link Download Template (Google Drive, dll)"
-                className="glass-card px-3 py-2 text-sm md:col-span-2"
+                placeholder="Link Download (Google Drive, dll)"
+                className="glass-card w-full px-3 py-1.5 text-xs"
               />
-              {/* Discount – only show when editing */}
+
+              {/* Row 5: Diskon — only on edit */}
               {editingId !== null && (
-                <div className="glass-card px-3 py-3 md:col-span-2 space-y-1">
-                  <p className="text-sm font-medium text-textPrimary">Diskon (%)</p>
-                  <p className="text-xs text-muted">Masukkan angka 0–100. Harga asli akan dicoret di storefront.</p>
+                <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                  <span className="text-xs text-muted shrink-0">Diskon (%)</span>
                   <input
                     type="number"
                     min="0"
@@ -553,45 +588,31 @@ export function ProductsManager({
                     value={form.discountPct}
                     onChange={(event) => setForm((value) => ({ ...value, discountPct: event.target.value }))}
                     placeholder="0"
-                    className="glass-card px-3 py-2 text-sm w-32"
+                    className="glass-card px-2 py-1 text-xs w-16 text-center"
                   />
+                  <span className="text-xs text-muted">Harga asli akan dicoret di storefront</span>
                 </div>
               )}
-              <select
-                value={form.categoryId}
-                onChange={(event) => setForm((value) => ({ ...value, categoryId: event.target.value }))}
-                className="glass-card px-3 py-2 text-sm"
-              >
-                <option value="">No Category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-              <div className="glass-card space-y-3 px-3 py-3 text-sm md:col-span-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-textPrimary">Foto Produk</p>
-                    <p className="text-xs text-muted">Upload lebih dari 1 foto, tanpa input id manual</p>
-                  </div>
+
+              {/* Row 6: Photo Upload */}
+              <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-textPrimary">Foto Produk</span>
                   <CldUploadWidget
                     uploadPreset={uploadPreset || undefined}
                     config={cloudName ? { cloud: { cloudName } } : undefined}
                     options={{ maxFiles: 8, multiple: true }}
                     onSuccess={(result) => onUploadResult(result as UploadWidgetResult)}
                     onUpload={(result) => onUploadResult(result as UploadWidgetResult)}
-                    onError={(error) => {
-                      setUploadError(formatUploadError(error as UploadWidgetError));
-                    }}
+                    onError={(error) => { setUploadError(formatUploadError(error as UploadWidgetError)); }}
                   >
                     {({ open }) => (
                       <button
                         type="button"
                         onClick={() => open()}
-                        className="rounded-lg border border-white/15 px-3 py-1.5 text-xs"
+                        className="rounded border border-white/20 px-2.5 py-1 text-[11px] text-muted hover:text-textPrimary hover:border-white/40 transition-colors"
                       >
-                        Upload Foto
+                        + Upload Foto
                       </button>
                     )}
                   </CldUploadWidget>
@@ -600,58 +621,43 @@ export function ProductsManager({
                 {uploadError ? <p className="text-xs text-red-300">{uploadError}</p> : null}
 
                 {form.imageUrls.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <div className="grid grid-cols-4 gap-1.5">
                     {form.imageUrls.map((image) => (
-                      <div key={image} className="relative overflow-hidden rounded-lg bg-white/5">
+                      <div key={image} className="relative overflow-hidden rounded bg-white/5 aspect-video">
                         <CldImage
-                          width={200}
-                          height={140}
+                          width={160}
+                          height={90}
                           src={image}
                           alt="Product image"
-                          className="h-20 w-full object-cover"
+                          className="w-full h-full object-cover"
                         />
                         <button
                           type="button"
-                          onClick={() =>
-                            setForm((current) => ({
-                              ...current,
-                              imageUrls: current.imageUrls.filter((item) => item !== image),
-                            }))
-                          }
-                          className="absolute right-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white"
+                          onClick={() => setForm((current) => ({ ...current, imageUrls: current.imageUrls.filter((item) => item !== image) }))}
+                          className="absolute right-0.5 top-0.5 rounded bg-black/70 px-1 py-0.5 text-[9px] text-white hover:bg-red-700 transition-colors"
                         >
-                          Hapus
+                          ✕
                         </button>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted">Belum ada foto diupload.</p>
+                  <p className="text-[11px] text-muted">Belum ada foto diupload.</p>
                 )}
               </div>
-              <select
-                value={form.status}
-                onChange={(event) =>
-                  setForm((value) => ({ ...value, status: event.target.value as ProductStatus }))
-                }
-                className="glass-card px-3 py-2 text-sm"
-              >
-                <option value="active">Active</option>
-                <option value="draft">Draft</option>
-                <option value="archived">Archived</option>
-              </select>
             </div>
 
-            <div className="flex justify-end gap-2">
+            {/* Footer actions */}
+            <div className="flex justify-end gap-2 px-4 py-3 border-t border-white/10 shrink-0">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg border border-white/15 px-4 py-2 text-sm"
+                className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-muted hover:text-textPrimary transition-colors"
               >
-                Cancel
+                Batal
               </button>
-              <button className="rounded-lg bg-accentBlue px-4 py-2 text-sm font-medium text-white">
-                Save
+              <button className="rounded-lg bg-accentBlue px-4 py-1.5 text-xs font-medium text-white hover:opacity-90 transition-opacity">
+                Simpan
               </button>
             </div>
           </form>
@@ -660,3 +666,4 @@ export function ProductsManager({
     </section>
   );
 }
+
