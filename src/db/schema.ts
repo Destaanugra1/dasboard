@@ -19,6 +19,8 @@ export const orderStatusEnum = pgEnum("order_status", [
   "shipped",
   "delivered",
   "returned",
+  "success",
+  "failed"
 ]);
 
 export const users = pgTable("users", {
@@ -48,6 +50,7 @@ export const products = pgTable("products", {
   stock: integer("stock").notNull().default(0),
   categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
   imageUrl: text("image_url"),
+  fileUrl: text("file_url"),
   status: productStatusEnum("status").notNull().default("active"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
       imageUrl: products.imageUrl,
       categoryId: products.categoryId,
       categoryName: categories.name,
+      fileUrl: products.fileUrl,
       createdAt: products.createdAt,
     })
     .from(products)
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
     categoryId?: number | null;
     imageUrl?: string;
     imageUrls?: string[];
+    fileUrl?: string;
     status?: ProductStatus;
   };
 
@@ -107,6 +109,7 @@ export async function POST(request: NextRequest) {
       stock: body.stock ?? 0,
       categoryId: body.categoryId ?? null,
       imageUrl: serializeProductImages(resolvedImages),
+      fileUrl: body.fileUrl,
       status: body.status ?? "active",
     })
     .returning();

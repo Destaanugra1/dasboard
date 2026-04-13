@@ -58,6 +58,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
     categoryId?: number | null;
     imageUrl?: string;
     imageUrls?: string[];
+    fileUrl?: string;
     status?: ProductStatus;
   };
 
@@ -69,6 +70,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
     stock?: number;
     categoryId?: number | null;
     imageUrl?: string;
+    fileUrl?: string;
     status?: ProductStatus;
   } = {};
 
@@ -85,6 +87,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
   } else if (body.imageUrl !== undefined) {
     updateValues.imageUrl = serializeProductImages(body.imageUrl ? [body.imageUrl] : []) ?? undefined;
   }
+  if (body.fileUrl !== undefined) updateValues.fileUrl = body.fileUrl;
   if (body.status) updateValues.status = body.status;
 
   const [updated] = await db

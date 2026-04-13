@@ -23,6 +23,7 @@ type ProductRow = {
   categoryId: number | null;
   categoryName: string | null;
   createdAt: string;
+  fileUrl: string | null;
 };
 
 type UploadInfo = {
@@ -68,6 +69,7 @@ type FormState = {
   stock: string;
   status: ProductStatus;
   imageUrls: string[];
+  fileUrl: string;
 };
 
 const EMPTY_FORM: FormState = {
@@ -78,6 +80,7 @@ const EMPTY_FORM: FormState = {
   categoryId: "",
   status: "active",
   imageUrls: [],
+  fileUrl: "",
 };
 
 export function ProductsManager({
@@ -184,6 +187,7 @@ export function ProductsManager({
       stock: String(product.stock),
       categoryId: product.categoryId ? String(product.categoryId) : "",
       status: product.status,
+      fileUrl: product.fileUrl ?? "",
       imageUrls:
         product.imageUrls && product.imageUrls.length > 0
           ? product.imageUrls
@@ -260,6 +264,7 @@ export function ProductsManager({
       categoryId: form.categoryId ? Number(form.categoryId) : null,
       imageUrls: form.imageUrls,
       status: form.status,
+      fileUrl: form.fileUrl,
     };
 
     const endpoint = editingId ? `/api/products/${editingId}` : "/api/products";
@@ -524,6 +529,12 @@ export function ProductsManager({
                 onChange={(event) => setForm((value) => ({ ...value, stock: event.target.value }))}
                 placeholder="Stock"
                 className="glass-card px-3 py-2 text-sm"
+              />
+              <input
+                value={form.fileUrl}
+                onChange={(event) => setForm((value) => ({ ...value, fileUrl: event.target.value }))}
+                placeholder="Link Download Template (Google Drive, dll)"
+                className="glass-card px-3 py-2 text-sm md:col-span-2"
               />
               <select
                 value={form.categoryId}

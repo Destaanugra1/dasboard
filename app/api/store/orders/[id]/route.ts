@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/src/db";
-import { orders } from "@/src/db/schema";
+import { orders, orderItems, products } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(
@@ -18,9 +18,25 @@ export async function GET(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    const orderData = orderList[0];
+
+    // Fetch the attached fileUrl and productName from order items
+    const [item] = await db.select({
+       productName: products.name,
+       fileUrl: products.fileUrl
+    })
+    .from(orderItems)
+    .innerJoin(products, eq(orderItems.productId, products.id))
+    .where(eq(orderItems.orderId, orderId))
+    .limit(1);
+
     return NextResponse.json({
       success: true,
-      order: orderList[0],
+      order: {
+         ...orderData,
+         productName: item?.productName || "Produk",
+         fileUrl: item?.fileUrl || null
+      },
     });
   } catch (error: any) {
     console.error("Fetch Order error:", error);

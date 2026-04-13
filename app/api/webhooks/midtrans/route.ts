@@ -17,14 +17,14 @@ export async function POST(req: Request) {
     if (transaction_status === "capture" || transaction_status === "settlement") {
       if (fraud_status !== "challenge") {
          await db.update(orders)
-           .set({ status: "processing" }) 
+           .set({ status: "success" }) 
            .where(eq(orders.externalId, order_id));
 
          // TODO: Send email with template download link here
       }
     } else if (transaction_status === "cancel" || transaction_status === "deny" || transaction_status === "expire") {
        await db.update(orders)
-         .set({ status: "returned" }) 
+         .set({ status: "failed" }) 
          .where(eq(orders.externalId, order_id));
     }
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/src/db";
-import { products, orders } from "@/src/db/schema";
+import { products, orders, orderItems } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import midtransClient from "midtrans-client";
 
@@ -35,8 +35,16 @@ export async function POST(req: Request) {
       total: product.price,
       status: "pending",
     }).returning();
-    
     const order = newOrder[0];
+
+    // Insert Order Items so we know which product it is
+    await db.insert(orderItems).values({
+      orderId: order.id,
+      productId: product.id,
+      quantity: 1,
+      price: product.price
+    });
+
     const externalId = `order_${order.id}_${Date.now()}`;
 
     // Midtrans API Request
