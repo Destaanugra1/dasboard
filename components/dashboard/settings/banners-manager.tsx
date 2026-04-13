@@ -197,7 +197,7 @@ export function BannersManager() {
                   </div>
                 ) : (
                   <CldUploadWidget
-                    uploadPreset="ml_default"
+                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || ""}
                     options={{ folder: "banners", maxFiles: 1 }}
                     onSuccess={(result: any) => setDesktopImage(result.info.public_id)}
                   >
@@ -232,7 +232,7 @@ export function BannersManager() {
                   </div>
                 ) : (
                   <CldUploadWidget
-                    uploadPreset="ml_default"
+                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || ""}
                     options={{ folder: "banners", maxFiles: 1 }}
                     onSuccess={(result: any) => setMobileImage(result.info.public_id)}
                   >
