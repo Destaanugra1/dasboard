@@ -94,19 +94,25 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
 
           return (
             <div key={item.label} className="rounded-xl">
-              <button
-                type="button"
-                onClick={() => toggleGroup(item.label)}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm text-muted transition hover:bg-white/5 hover:text-textPrimary"
-              >
-                <span className="flex items-center gap-3">
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </span>
-                <ChevronDown
-                  className={`h-4 w-4 transition ${expanded[item.label] ? "rotate-180" : ""}`}
-                />
-              </button>
+              {(() => {
+                const isGroupActive = item.children?.some((child) => itemIsActive(child.href));
+                return (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(item.label)}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition hover:bg-white/5 hover:text-textPrimary ${
+                        isGroupActive ? "text-textPrimary font-medium" : "text-muted"
+                      }`}
+                    >
+                      <span className="flex items-center gap-3">
+                        <Icon className={`h-4 w-4 ${isGroupActive ? "text-accentBlue" : ""}`} />
+                        {item.label}
+                      </span>
+                      <ChevronDown
+                        className={`h-4 w-4 transition ${expanded[item.label] ? "rotate-180" : ""}`}
+                      />
+                    </button>
               {expanded[item.label] ? (
                 <div className="mt-1 space-y-1 pl-8">
                   {item.children?.map((child) => {
@@ -127,6 +133,9 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
                   })}
                 </div>
               ) : null}
+                  </>
+                );
+              })()}
             </div>
           );
         })}

@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
 import { eq } from "drizzle-orm";
 import { db } from "./index";
 import { media, products, users } from "./schema";
