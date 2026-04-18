@@ -11,7 +11,13 @@ function getSessionToken(request: NextRequest): string | undefined {
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const origin = request.headers.get("origin") ?? "";
-  const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "http://localhost:5174"];
+  const allowedOrigins = [
+    "http://localhost:5173", 
+    "http://localhost:3000", 
+    "http://localhost:5174",
+    "https://www.xenonlabs.my.id",
+    "https://xenonlabs.my.id"
+  ];
   const isAllowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
 
   // Handle CORS preflight OPTIONS requests for all /api endpoints
