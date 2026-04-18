@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/src/db";
 import { banners } from "@/src/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { authMiddleware } from "@/app/api/auth/middleware";
-
 export const revalidate = 0; // Dynamic route
-
-export const middleware = authMiddleware;
 
 export async function GET() {
   try {
