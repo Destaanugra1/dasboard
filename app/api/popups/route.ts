@@ -21,7 +21,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { type, isActive, title, message, imageUrl, buttonText, buttonUrl } = body;
+    const { type, isActive, title, message, imageUrl, buttonText, buttonUrl, targetPaths, showOnDev } = body;
 
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -40,6 +40,8 @@ export async function POST(req: Request) {
         imageUrl: imageUrl || null,
         buttonText: buttonText || null,
         buttonUrl: buttonUrl || null,
+        targetPaths: targetPaths || "*",
+        showOnDev: showOnDev ?? false,
       })
       .returning();
 

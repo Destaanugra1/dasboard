@@ -8,7 +8,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Commerce OS Dashboard",
+  title: "XenonStore Dashboard",
   description: "Production e-commerce admin dashboard",
 };
 

@@ -18,6 +18,8 @@ type SitePopup = {
   imageUrl: string | null;
   buttonText: string | null;
   buttonUrl: string | null;
+  targetPaths: string;
+  showOnDev: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -30,6 +32,8 @@ const defaultForm = {
   imageUrl: "",
   buttonText: "",
   buttonUrl: "",
+  targetPaths: "*",
+  showOnDev: false,
 };
 
 export function PopupManager() {
@@ -73,6 +77,8 @@ export function PopupManager() {
       imageUrl: popup.imageUrl || "",
       buttonText: popup.buttonText || "",
       buttonUrl: popup.buttonUrl || "",
+      targetPaths: popup.targetPaths,
+      showOnDev: popup.showOnDev,
     });
     setShowModal(true);
   };
@@ -302,6 +308,66 @@ export function PopupManager() {
                   </div>
                 </div>
               )}
+
+              {/* Target Paths */}
+              <div>
+                <label className="block text-sm font-medium text-muted mb-1">Target Halaman</label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      id="target-all"
+                      checked={form.targetPaths === "*"}
+                      onChange={() => setForm(f => ({ ...f, targetPaths: "*" }))}
+                      className="accent-accentTeal"
+                    />
+                    <label htmlFor="target-all" className="text-sm text-textPrimary">Semua Halaman (Default)</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      id="target-specific"
+                      checked={form.targetPaths !== "*"}
+                      onChange={() => setForm(f => ({ ...f, targetPaths: f.targetPaths === "*" ? "/" : f.targetPaths }))}
+                      className="accent-accentTeal"
+                    />
+                    <label htmlFor="target-specific" className="text-sm text-textPrimary">Halaman Tertentu</label>
+                  </div>
+                </div>
+                {form.targetPaths !== "*" && (
+                  <input
+                    type="text"
+                    value={form.targetPaths}
+                    onChange={(e) => setForm(f => ({ ...f, targetPaths: e.target.value }))}
+                    placeholder="Contoh: /blog, /template/xyz"
+                    className="w-full mt-2 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-textPrimary placeholder:text-muted/50 focus:border-accentTeal focus:outline-none"
+                  />
+                )}
+                <p className="text-xs text-muted mt-1">Pisahkan dengan koma jika lebih dari satu path.</p>
+              </div>
+
+              {/* Show On Dev Toggle */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, showOnDev: !f.showOnDev }))}
+                  className="transition-colors"
+                >
+                  {form.showOnDev ? (
+                    <ToggleRight size={28} className="text-blue-400" />
+                  ) : (
+                    <ToggleLeft size={28} className="text-muted" />
+                  )}
+                </button>
+                <div>
+                  <p className="text-sm font-medium text-textPrimary">
+                    {form.showOnDev ? "Tampil di Development" : "Sembunyikan di Development"}
+                  </p>
+                  <p className="text-xs text-muted">
+                    Jika tidak aktif, popup tidak muncul saat diakses via localhost.
+                  </p>
+                </div>
+              </div>
 
               {/* Active Toggle */}
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">

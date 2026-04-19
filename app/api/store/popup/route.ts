@@ -5,16 +5,27 @@ import { eq, and } from "drizzle-orm";
 export const revalidate = 0;
 
 // Public endpoint — returns the currently active popup (one per type)
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const path = searchParams.get("path") || "/";
+
     const activePopups = await db
       .select()
       .from(sitePopups)
       .where(eq(sitePopups.isActive, true));
 
+    // Filter by path matching
+    const matchedPopups = activePopups.filter((p) => {
+      if (p.targetPaths === "*") return true;
+      const paths = p.targetPaths.split(",").map((x) => x.trim());
+      // Simple startsWith or exact match? Let's use exact match or startsWith
+      return paths.some(pt => path === pt || (pt !== "/" && path.startsWith(pt)));
+    });
+
     // Separate by type, return active ad and active maintenance
-    const ad = activePopups.find((p) => p.type === "ad") || null;
-    const maintenance = activePopups.find((p) => p.type === "maintenance") || null;
+    const ad = matchedPopups.find((p) => p.type === "ad") || null;
+    const maintenance = matchedPopups.find((p) => p.type === "maintenance") || null;
 
     return NextResponse.json({ success: true, data: { ad, maintenance } });
   } catch (error: any) {

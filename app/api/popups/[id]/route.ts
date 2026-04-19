@@ -8,7 +8,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   try {
     const id = parseInt(params.id);
     const body = await req.json();
-    const { type, isActive, title, message, imageUrl, buttonText, buttonUrl } = body;
+    const { type, isActive, title, message, imageUrl, buttonText, buttonUrl, targetPaths, showOnDev } = body;
 
     const [updated] = await db
       .update(sitePopups)
@@ -20,6 +20,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         ...(imageUrl !== undefined && { imageUrl }),
         ...(buttonText !== undefined && { buttonText }),
         ...(buttonUrl !== undefined && { buttonUrl }),
+        ...(targetPaths !== undefined && { targetPaths }),
+        ...(showOnDev !== undefined && { showOnDev }),
         updatedAt: new Date(),
       })
       .where(eq(sitePopups.id, id))

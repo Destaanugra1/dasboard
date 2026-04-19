@@ -75,6 +75,8 @@ export const sitePopups = pgTable("site_popups", {
   imageUrl: text("image_url"),
   buttonText: varchar("button_text", { length: 100 }),
   buttonUrl: text("button_url"),
+  targetPaths: varchar("target_paths", { length: 255 }).notNull().default("*"),
+  showOnDev: boolean("show_on_dev").notNull().default(false),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
