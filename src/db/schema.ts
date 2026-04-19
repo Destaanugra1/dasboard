@@ -14,6 +14,7 @@ import {
 export const userRoleEnum = pgEnum("user_role", ["admin", "staff", "viewer"]);
 export const userStatusEnum = pgEnum("user_status", ["active", "inactive"]);
 export const productStatusEnum = pgEnum("product_status", ["active", "draft", "archived"]);
+export const popupTypeEnum = pgEnum("popup_type", ["ad", "maintenance"]);
 export const orderStatusEnum = pgEnum("order_status", [
   "pending",
   "processing",
@@ -62,6 +63,19 @@ export const banners = pgTable("banners", {
   desktopImageUrl: text("desktop_image_url").notNull(),
   mobileImageUrl: text("mobile_image_url").notNull(),
   isActive: boolean("is_active").default(false).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const sitePopups = pgTable("site_popups", {
+  id: serial("id").primaryKey(),
+  type: popupTypeEnum("type").notNull().default("ad"),
+  isActive: boolean("is_active").default(false).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message"),
+  imageUrl: text("image_url"),
+  buttonText: varchar("button_text", { length: 100 }),
+  buttonUrl: text("button_url"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

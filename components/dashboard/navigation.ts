@@ -71,6 +71,7 @@ export const navItems: NavItem[] = [
     children: [
       { label: "General", href: "/dashboard/settings" },
       { label: "Banners", href: "/dashboard/settings/banners" },
+      { label: "Popups", href: "/dashboard/settings/popups" },
       { label: "Profile", href: "/dashboard/settings/profile" },
       { label: "Integrations", href: "/dashboard/settings/integrations" },
     ],

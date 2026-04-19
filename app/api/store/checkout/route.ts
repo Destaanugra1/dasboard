@@ -107,7 +107,11 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Checkout Error:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { 
+        error: "Internal Server Error", 
+        message: error?.message || "Unknown error occurred",
+        midtransDetail: error?.ApiResponse || null
+      },
       { status: 500 }
     );
   }
