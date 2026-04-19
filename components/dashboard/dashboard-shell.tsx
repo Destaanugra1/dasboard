@@ -26,6 +26,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
     Products: pathname.startsWith("/dashboard/products"),
     Orders: pathname.startsWith("/dashboard/orders"),
     Analytics: pathname.startsWith("/dashboard/analytics"),
+    Blog: pathname.startsWith("/dashboard/blog"),
     Media: pathname.startsWith("/dashboard/media"),
     Settings: pathname.startsWith("/dashboard/settings"),
   });

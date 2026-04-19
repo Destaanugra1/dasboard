@@ -2,6 +2,7 @@ import {
   BarChart2,
   Image,
   LayoutDashboard,
+  Newspaper,
   Package,
   Settings,
   ShoppingCart,
@@ -55,6 +56,16 @@ export const navItems: NavItem[] = [
       { label: "Overview", href: "/dashboard/analytics" },
       { label: "Revenue", href: "/dashboard/analytics/revenue" },
       { label: "Traffic", href: "/dashboard/analytics/traffic" },
+    ],
+  },
+  {
+    label: "Blog",
+    icon: Newspaper,
+    children: [
+      { label: "Semua Artikel", href: "/dashboard/blog" },
+      { label: "Tulis Artikel", href: "/dashboard/blog/new" },
+      { label: "Kategori", href: "/dashboard/blog/categories" },
+      { label: "Pengaturan", href: "/dashboard/blog/settings" },
     ],
   },
   {

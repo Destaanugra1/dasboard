@@ -55,6 +55,7 @@ export default async function middleware(request: NextRequest) {
       pathname.startsWith("/api/store/products") ||
       pathname.startsWith("/api/store/popup") ||
       pathname.startsWith("/api/webhooks") ||
+      pathname.startsWith("/api/blog") ||
       /^\/api\/store\/orders\/[^/]+\/status/.test(pathname) ||
       /^\/api\/store\/orders\/[^/]+\/mock-pay/.test(pathname);
 

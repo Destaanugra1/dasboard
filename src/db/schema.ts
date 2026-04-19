@@ -15,6 +15,7 @@ export const userRoleEnum = pgEnum("user_role", ["admin", "staff", "viewer"]);
 export const userStatusEnum = pgEnum("user_status", ["active", "inactive"]);
 export const productStatusEnum = pgEnum("product_status", ["active", "draft", "archived"]);
 export const popupTypeEnum = pgEnum("popup_type", ["ad", "maintenance"]);
+export const blogPostStatusEnum = pgEnum("blog_post_status", ["published", "draft"]);
 export const orderStatusEnum = pgEnum("order_status", [
   "pending",
   "processing",
@@ -153,5 +154,54 @@ export const mediaRelations = relations(media, ({ one }) => ({
   uploader: one(users, {
     fields: [media.uploadedBy],
     references: [users.id],
+  }),
+}));
+
+// ─── Blog ───────────────────────────────────────────────────────────────────
+
+export const blogCategories = pgTable("blog_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 120 }).notNull(),
+  slug: varchar("slug", { length: 140 }).notNull().unique(),
+  description: text("description"),
+  icon: varchar("icon", { length: 50 }).notNull().default("📰"),
+  color: varchar("color", { length: 30 }).notNull().default("#b91c1c"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const blogPosts = pgTable("blog_posts", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 280 }).notNull().unique(),
+  excerpt: text("excerpt"),
+  content: text("content"),
+  coverImageUrl: text("cover_image_url"),
+  categoryId: integer("category_id").references(() => blogCategories.id, { onDelete: "set null" }),
+  authorName: varchar("author_name", { length: 120 }).notNull().default("Admin"),
+  authorAvatarUrl: text("author_avatar_url"),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  isTrending: boolean("is_trending").notNull().default(false),
+  isPopular: boolean("is_popular").notNull().default(false),
+  status: blogPostStatusEnum("status").notNull().default("draft"),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const blogSettings = pgTable("blog_settings", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const blogCategoriesRelations = relations(blogCategories, ({ many }) => ({
+  posts: many(blogPosts),
+}));
+
+export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
+  category: one(blogCategories, {
+    fields: [blogPosts.categoryId],
+    references: [blogCategories.id],
   }),
 }));
