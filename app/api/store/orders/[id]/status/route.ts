@@ -13,17 +13,18 @@ const coreApi = new midtransClient.CoreApi({
   clientKey: process.env.MIDTRANS_CLIENT_KEY || "",
 });
 
-// Map status Midtrans ke status internal kita
+// Map status Midtrans ke status enum yang valid di schema DB
+// orderStatusEnum: "pending" | "processing" | "shipped" | "delivered" | "returned" | "success" | "failed"
 function mapMidtransStatus(
   transactionStatus: string,
   fraudStatus?: string
-): string | null {
+): "success" | "failed" | "returned" | "processing" | null {
   if (transactionStatus === "capture") {
-    return fraudStatus === "accept" ? "paid" : null;
+    return fraudStatus === "accept" ? "success" : "failed";
   }
-  if (transactionStatus === "settlement") return "paid";
+  if (transactionStatus === "settlement") return "success";
   if (transactionStatus === "pending") return null; // belum bayar
-  if (["deny", "cancel", "expire"].includes(transactionStatus)) return "canceled";
+  if (["deny", "cancel", "expire"].includes(transactionStatus)) return "failed";
   if (transactionStatus === "refund") return "returned";
   return null;
 }
@@ -49,7 +50,7 @@ export async function GET(
     const order = orderList[0];
 
     // Jika sudah final (paid/canceled/dll), langsung kembalikan dari DB
-    const finalStatuses = ["paid", "canceled", "failed", "expired", "returned", "processing", "delivered", "success"];
+    const finalStatuses = ["success", "failed", "returned", "processing", "shipped", "delivered"];
     if (finalStatuses.includes(order.status)) {
       return NextResponse.json({
         success: true,
@@ -61,7 +62,7 @@ export async function GET(
     // Jika masih pending dan ada externalId, cek ke Midtrans
     if (order.externalId && serverKey) {
       try {
-        const midtransStatus = await coreApi.transaction.status(order.externalId);
+        const midtransStatus = await (coreApi as any).transaction.status(order.externalId);
         const newStatus = mapMidtransStatus(
           midtransStatus.transaction_status,
           midtransStatus.fraud_status

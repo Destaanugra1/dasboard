@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Save, Loader2, X, Star, TrendingUp, BarChart2, Eye, EyeOff } from "lucide-react";
 import { CldUploadWidget } from "next-cloudinary";
 import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
@@ -274,7 +275,7 @@ export function BlogPostForm({ slug, categories }: BlogPostFormProps) {
             <h3 className="text-sm font-semibold text-textPrimary">Cover Image</h3>
             {form.coverImageUrl ? (
               <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
-                <img src={form.coverImageUrl} alt="Cover" className="w-full h-full object-cover" />
+                <Image src={form.coverImageUrl} alt="Cover" fill className="object-cover" unoptimized />
                 <button
                   type="button"
                   onClick={() => set("coverImageUrl", "")}

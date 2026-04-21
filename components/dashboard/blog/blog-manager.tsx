@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Plus, Trash2, Edit2, Loader2, Star, TrendingUp, BarChart2,
@@ -35,11 +36,7 @@ export function BlogManager({ role }: { role: UserRole }) {
   const [total, setTotal] = useState(0);
   const canEdit = canManageBlog(role);
 
-  useEffect(() => {
-    fetchPosts();
-  }, [filterStatus]);
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ pageSize: "50" });
@@ -53,7 +50,11 @@ export function BlogManager({ role }: { role: UserRole }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterStatus]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   const handleDelete = async (slug: string, title: string) => {
     if (!canEdit) return;
@@ -147,7 +148,7 @@ export function BlogManager({ role }: { role: UserRole }) {
                 {/* Cover thumbnail */}
                 <div className="flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden bg-white/5 border border-white/10">
                   {post.coverImageUrl ? (
-                    <img src={post.coverImageUrl} alt="" className="w-full h-full object-cover" />
+                    <Image src={post.coverImageUrl} alt="" fill className="object-cover" unoptimized />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-xl">
                       {post.categoryIcon ?? "📰"}
