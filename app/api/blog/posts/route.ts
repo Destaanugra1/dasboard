@@ -3,7 +3,7 @@ import { db } from "@/src/db";
 import { blogPosts, blogCategories } from "@/src/db/schema";
 import { and, asc, count, desc, eq, ilike } from "drizzle-orm";
 import { auth } from "@/auth";
-import { canWrite } from "@/src/lib/authz";
+import { canManageBlog } from "@/src/lib/authz";
 import { slugify } from "@/src/lib/slug";
 
 // Public — GET posts with filtering
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!canWrite(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!canManageBlog(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await req.json();
   const { title, excerpt, content, coverImageUrl, categoryId, authorName, authorAvatarUrl,

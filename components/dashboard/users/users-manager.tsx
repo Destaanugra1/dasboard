@@ -50,7 +50,7 @@ export function UsersManager({ role }: { role: UserRole }) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
   const pageSize = 10;
-  const canWrite = role === "admin" || role === "staff";
+  const canWrite = role === "admin";
   const maxPage = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total]);
 
   async function load() {

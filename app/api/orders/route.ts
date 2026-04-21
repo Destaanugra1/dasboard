@@ -3,6 +3,7 @@ import { and, desc, count, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/src/db";
 import { orders, users } from "@/src/db/schema";
+import { canAccessStore } from "@/src/lib/authz";
 
 type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returned" | "success" | "failed";
 
@@ -10,6 +11,10 @@ export async function GET(request: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!canAccessStore(session.user.role)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const status = request.nextUrl.searchParams.get("status") as OrderStatus | null;

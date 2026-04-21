@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { canWrite } from "@/src/lib/authz";
+import { canManageStore } from "@/src/lib/authz";
 import { cloudinary } from "@/src/lib/cloudinary";
 
 type SignatureBody = {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!canWrite(session.user.role)) {
+  if (!canManageStore(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -1,6 +1,17 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { ComingSoon } from "@/components/dashboard/coming-soon";
+import { canAccessStore, defaultDashboardPath } from "@/src/lib/authz";
 
-export default function PendingOrdersPage() {
+export default async function PendingOrdersPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  if (!canAccessStore(session.user.role)) {
+    redirect(defaultDashboardPath(session.user.role));
+  }
+
   return (
     <ComingSoon
       title="Pending Orders"

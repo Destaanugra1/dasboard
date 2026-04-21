@@ -1,11 +1,22 @@
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { BannersManager } from "@/components/dashboard/settings/banners-manager";
+import { canAccessStore, defaultDashboardPath } from "@/src/lib/authz";
 
 export const metadata: Metadata = {
   title: "Banners Settings | Dashboard",
 };
 
-export default function BannersPage() {
+export default async function BannersPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  if (!canAccessStore(session.user.role)) {
+    redirect(defaultDashboardPath(session.user.role));
+  }
+
   return (
     <div className="space-y-6">
       <div>

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { verifyAccessToken } from "@/app/api/auth/auth";
+import { canAccessDashboardPath, defaultDashboardPath, type UserRole } from "@/src/lib/authz";
 
 function getSessionToken(request: NextRequest): string | undefined {
   return (
@@ -37,11 +39,19 @@ export default async function middleware(request: NextRequest) {
 
   // Dashboard session authentication (unchanged behavior)
   if (pathname.startsWith("/dashboard")) {
-    const token = getSessionToken(request);
-    if (!token) {
+    const sessionToken = getSessionToken(request);
+    if (!sessionToken) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
+    }
+
+    const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+    const jwt = await getToken({ req: request, secret });
+    const role = (jwt?.role as UserRole | undefined) ?? "viewer";
+
+    if (!canAccessDashboardPath(role, pathname)) {
+      return NextResponse.redirect(new URL(defaultDashboardPath(role), request.url));
     }
     return response;
   }

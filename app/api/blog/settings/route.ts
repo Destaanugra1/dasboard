@@ -3,7 +3,7 @@ import { db } from "@/src/db";
 import { blogSettings } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
-import { canWrite } from "@/src/lib/authz";
+import { canManageBlog } from "@/src/lib/authz";
 
 // Public — GET all settings as key-value map
 export async function GET() {
@@ -17,7 +17,7 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!canWrite(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!canManageBlog(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = (await req.json()) as Record<string, string>;
   const now = new Date();

@@ -73,7 +73,9 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
       </div>
 
       <nav className="space-y-2">
-        {navItems.map((item) => {
+        {navItems
+          .filter((item) => !item.roles || item.roles.includes(user.role))
+          .map((item) => {
           const Icon = item.icon;
           if (item.href) {
             const active = itemIsActive(item.href);
@@ -116,7 +118,9 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
                     </button>
               {expanded[item.label] ? (
                 <div className="mt-1 space-y-1 pl-8">
-                  {item.children?.map((child) => {
+                  {item.children
+                    ?.filter((child) => !child.roles || child.roles.includes(user.role))
+                    .map((child) => {
                     const active = itemIsActive(child.href);
                     return (
                       <Link

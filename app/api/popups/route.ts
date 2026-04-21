@@ -1,11 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/db";
 import { sitePopups } from "@/src/db/schema";
 import { desc } from "drizzle-orm";
+import { auth } from "@/auth";
+import { canManageStore } from "@/src/lib/authz";
 
 // GET all popups (for dashboard management)
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!canManageStore(session.user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const data = await db
       .select()
       .from(sitePopups)
@@ -18,8 +28,16 @@ export async function GET() {
 }
 
 // POST create new popup
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!canManageStore(session.user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await req.json();
     const { type, isActive, title, message, imageUrl, buttonText, buttonUrl, targetPaths, showOnDev } = body;
 

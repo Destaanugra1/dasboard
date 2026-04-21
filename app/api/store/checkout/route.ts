@@ -7,8 +7,8 @@ import midtransClient from "midtrans-client";
 const serverKey = process.env.MIDTRANS_SERVER_KEY || "SB-Mid-server-12345";
 const clientKey = process.env.MIDTRANS_CLIENT_KEY || "SB-Mid-client-12345";
 
-// Midtrans Sandbox keys start with 'SB-'. If it doesn't, it's a production key.
-const isProd = process.env.MIDTRANS_IS_PRODUCTION === 'true' || !serverKey.startsWith('SB-');
+// Gunakan env var eksplisit. Default ke false (sandbox) jika tidak di-set.
+const isProd = process.env.MIDTRANS_IS_PRODUCTION === 'true';
 
 const coreApi = new midtransClient.CoreApi({
   isProduction: isProd,

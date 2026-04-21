@@ -1,12 +1,23 @@
 import { desc, eq, sql } from "drizzle-orm";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { db } from "@/src/db";
 import { orderItems, orders, products, users } from "@/src/db/schema";
 import { toCurrency, toDate } from "@/src/lib/format";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueAreaChart } from "@/components/dashboard/charts/revenue-area-chart";
 import { TopProductsCard } from "@/components/dashboard/top-products-card";
+import { canAccessStore, defaultDashboardPath } from "@/src/lib/authz";
 
 export default async function DashboardOverviewPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  if (!canAccessStore(session.user.role)) {
+    redirect(defaultDashboardPath(session.user.role));
+  }
+
   const [revenueAgg] = await db
     .select({ value: sql<string>`coalesce(sum(${orders.total}), 0)` })
     .from(orders)

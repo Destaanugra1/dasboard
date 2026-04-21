@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/src/db";
 import { orderItems, orders, products, users } from "@/src/db/schema";
-import { canWrite } from "@/src/lib/authz";
+import { canAccessStore, canManageStore } from "@/src/lib/authz";
 
 type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "returned" | "success" | "failed";
 
@@ -11,6 +11,10 @@ export async function GET(_request: NextRequest, context: { params: { id: string
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!canAccessStore(session.user.role)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const id = Number(context.params.id);
@@ -65,7 +69,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!canWrite(session.user.role)) {
+  if (!canManageStore(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

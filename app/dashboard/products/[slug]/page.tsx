@@ -2,16 +2,27 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { db } from "@/src/db";
 import { parseProductImages } from "@/src/lib/product-images";
 import { products } from "@/src/db/schema";
 import { ProductImagePreview } from "./product-image-preview";
+import { canAccessStore, defaultDashboardPath } from "@/src/lib/authz";
 
 export default async function ProductDetailPage({
   params,
 }: {
   params: { slug: string };
 }) {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  if (!canAccessStore(session.user.role)) {
+    redirect(defaultDashboardPath(session.user.role));
+  }
+
   const [product] = await db
     .select({
       id: products.id,

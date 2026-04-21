@@ -6,6 +6,7 @@ import {
   Plus, Trash2, Edit2, Loader2, Star, TrendingUp, BarChart2,
   Eye, EyeOff, Search, Filter
 } from "lucide-react";
+import { canManageBlog, type UserRole } from "@/src/lib/authz";
 
 type BlogPost = {
   id: number;
@@ -26,12 +27,13 @@ type BlogPost = {
   categoryColor: string | null;
 };
 
-export function BlogManager() {
+export function BlogManager({ role }: { role: UserRole }) {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
   const [total, setTotal] = useState(0);
+  const canEdit = canManageBlog(role);
 
   useEffect(() => {
     fetchPosts();
@@ -54,12 +56,14 @@ export function BlogManager() {
   };
 
   const handleDelete = async (slug: string, title: string) => {
+    if (!canEdit) return;
     if (!confirm(`Hapus artikel "${title}"?`)) return;
     await fetch(`/api/blog/posts/${slug}`, { method: "DELETE" });
     fetchPosts();
   };
 
   const handleToggle = async (post: BlogPost, field: "isFeatured" | "isTrending" | "isPopular" | "status") => {
+    if (!canEdit) return;
     const body =
       field === "status"
         ? { status: post.status === "published" ? "draft" : "published" }
@@ -85,13 +89,15 @@ export function BlogManager() {
           <h2 className="text-xl font-semibold text-textPrimary">Manajemen Artikel Blog</h2>
           <p className="text-sm text-muted mt-0.5">{total} artikel total</p>
         </div>
-        <Link
-          href="/dashboard/blog/new"
-          className="flex items-center gap-2 rounded-xl bg-accentTeal px-4 py-2 text-sm font-medium text-white hover:bg-accentTeal/90 transition-colors"
-        >
-          <Plus size={16} />
-          Tulis Artikel
-        </Link>
+        {canEdit ? (
+          <Link
+            href="/dashboard/blog/new"
+            className="flex items-center gap-2 rounded-xl bg-accentTeal px-4 py-2 text-sm font-medium text-white hover:bg-accentTeal/90 transition-colors"
+          >
+            <Plus size={16} />
+            Tulis Artikel
+          </Link>
+        ) : null}
       </div>
 
       {/* Filters */}
@@ -180,50 +186,54 @@ export function BlogManager() {
 
                 {/* Flag toggles */}
                 <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleToggle(post, "isFeatured")}
-                      title="Featured (Hero)"
-                      className={`p-1.5 rounded-lg transition-colors ${post.isFeatured ? "text-yellow-400 bg-yellow-400/10" : "text-muted hover:text-yellow-400"}`}
-                    >
-                      <Star size={13} />
-                    </button>
-                    <button
-                      onClick={() => handleToggle(post, "isTrending")}
-                      title="Trending"
-                      className={`p-1.5 rounded-lg transition-colors ${post.isTrending ? "text-orange-400 bg-orange-400/10" : "text-muted hover:text-orange-400"}`}
-                    >
-                      <TrendingUp size={13} />
-                    </button>
-                    <button
-                      onClick={() => handleToggle(post, "isPopular")}
-                      title="Popular"
-                      className={`p-1.5 rounded-lg transition-colors ${post.isPopular ? "text-accentTeal bg-accentTeal/10" : "text-muted hover:text-accentTeal"}`}
-                    >
-                      <BarChart2 size={13} />
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleToggle(post, "status")}
-                      title={post.status === "published" ? "Set ke Draft" : "Publish"}
-                      className={`p-1.5 rounded-lg transition-colors ${post.status === "published" ? "text-green-400 hover:text-muted" : "text-muted hover:text-green-400"}`}
-                    >
-                      {post.status === "published" ? <Eye size={13} /> : <EyeOff size={13} />}
-                    </button>
-                    <Link
-                      href={`/dashboard/blog/${post.slug}`}
-                      className="p-1.5 rounded-lg text-muted hover:text-textPrimary hover:bg-white/10 transition-colors"
-                    >
-                      <Edit2 size={13} />
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(post.slug, post.title)}
-                      className="p-1.5 rounded-lg text-muted hover:text-red-400 hover:bg-red-400/10 transition-colors"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
+                  {canEdit ? (
+                    <>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleToggle(post, "isFeatured")}
+                          title="Featured (Hero)"
+                          className={`p-1.5 rounded-lg transition-colors ${post.isFeatured ? "text-yellow-400 bg-yellow-400/10" : "text-muted hover:text-yellow-400"}`}
+                        >
+                          <Star size={13} />
+                        </button>
+                        <button
+                          onClick={() => handleToggle(post, "isTrending")}
+                          title="Trending"
+                          className={`p-1.5 rounded-lg transition-colors ${post.isTrending ? "text-orange-400 bg-orange-400/10" : "text-muted hover:text-orange-400"}`}
+                        >
+                          <TrendingUp size={13} />
+                        </button>
+                        <button
+                          onClick={() => handleToggle(post, "isPopular")}
+                          title="Popular"
+                          className={`p-1.5 rounded-lg transition-colors ${post.isPopular ? "text-accentTeal bg-accentTeal/10" : "text-muted hover:text-accentTeal"}`}
+                        >
+                          <BarChart2 size={13} />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleToggle(post, "status")}
+                          title={post.status === "published" ? "Set ke Draft" : "Publish"}
+                          className={`p-1.5 rounded-lg transition-colors ${post.status === "published" ? "text-green-400 hover:text-muted" : "text-muted hover:text-green-400"}`}
+                        >
+                          {post.status === "published" ? <Eye size={13} /> : <EyeOff size={13} />}
+                        </button>
+                        <Link
+                          href={`/dashboard/blog/${post.slug}`}
+                          className="p-1.5 rounded-lg text-muted hover:text-textPrimary hover:bg-white/10 transition-colors"
+                        >
+                          <Edit2 size={13} />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(post.slug, post.title)}
+                          className="p-1.5 rounded-lg text-muted hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               </div>
             ))}

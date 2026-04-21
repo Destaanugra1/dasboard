@@ -1,14 +1,19 @@
 import { eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { ProfileForm } from "@/components/dashboard/settings/profile-form";
 import { db } from "@/src/db";
 import { users } from "@/src/db/schema";
+import { canAccessStore, defaultDashboardPath } from "@/src/lib/authz";
 
 export default async function ProfileSettingsPage() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return null;
+    redirect("/login");
+  }
+  if (!canAccessStore(session.user.role)) {
+    redirect(defaultDashboardPath(session.user.role));
   }
 
   const userId = Number(session.user.id);

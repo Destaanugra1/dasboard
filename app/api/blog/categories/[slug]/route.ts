@@ -3,7 +3,7 @@ import { db } from "@/src/db";
 import { blogCategories } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
-import { canWrite } from "@/src/lib/authz";
+import { canManageBlog } from "@/src/lib/authz";
 import { slugify } from "@/src/lib/slug";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -18,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!canWrite(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!canManageBlog(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { slug } = await params;
   const body = await req.json();
@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 export async function DELETE(_req: NextRequest, { params }: Params) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!canWrite(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!canManageBlog(session.user.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { slug } = await params;
   await db.delete(blogCategories).where(eq(blogCategories.slug, slug));

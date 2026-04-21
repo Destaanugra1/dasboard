@@ -1,11 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/src/db";
 import { sitePopups } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
+import { auth } from "@/auth";
+import { canManageStore } from "@/src/lib/authz";
 
 // PUT update popup
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!canManageStore(session.user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const id = parseInt(params.id);
     const body = await req.json();
     const { type, isActive, title, message, imageUrl, buttonText, buttonUrl, targetPaths, showOnDev } = body;
@@ -39,8 +49,16 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 }
 
 // DELETE popup
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!canManageStore(session.user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const id = parseInt(params.id);
     await db.delete(sitePopups).where(eq(sitePopups.id, id));
     return NextResponse.json({ success: true });

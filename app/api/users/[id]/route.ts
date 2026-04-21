@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/src/db";
 import { users } from "@/src/db/schema";
-import { canWrite, isAdmin } from "@/src/lib/authz";
+import { isAdmin } from "@/src/lib/authz";
 
 type UserRole = "admin" | "staff" | "viewer";
 type UserStatus = "active" | "inactive";
@@ -13,6 +13,10 @@ export async function GET(_request: NextRequest, context: { params: { id: string
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!isAdmin(session.user.role)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const id = Number(context.params.id);
@@ -47,7 +51,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!canWrite(session.user.role)) {
+  if (!isAdmin(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

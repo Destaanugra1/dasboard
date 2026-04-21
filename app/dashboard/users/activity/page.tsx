@@ -1,9 +1,20 @@
 import { desc, eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { ActivityLogBoard, type ActivityEntry } from "@/components/dashboard/users/activity-log-board";
 import { db } from "@/src/db";
 import { media, orders, products, users } from "@/src/db/schema";
+import { defaultDashboardPath, isAdmin } from "@/src/lib/authz";
 
 export default async function UserActivityPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  if (!isAdmin(session.user.role)) {
+    redirect(defaultDashboardPath(session.user.role));
+  }
+
   const [userRows, orderRows, productRows, mediaRows] = await Promise.all([
     db
       .select({

@@ -3,13 +3,17 @@ import { desc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/src/db";
 import { media } from "@/src/db/schema";
-import { canWrite } from "@/src/lib/authz";
+import { canAccessStore, canManageStore } from "@/src/lib/authz";
 import { cloudinary } from "@/src/lib/cloudinary";
 
 export async function GET() {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!canAccessStore(session.user.role)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const data = await db.select().from(media).orderBy(desc(media.createdAt));
@@ -22,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!canWrite(session.user.role)) {
+  if (!canManageStore(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -57,7 +61,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!canWrite(session.user.role)) {
+  if (!canManageStore(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

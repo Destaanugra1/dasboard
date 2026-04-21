@@ -1,10 +1,21 @@
 import { sql } from "drizzle-orm";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { OrdersBarChart } from "@/components/dashboard/charts/orders-bar-chart";
 import { RevenueAreaChart } from "@/components/dashboard/charts/revenue-area-chart";
 import { db } from "@/src/db";
 import { orders, users } from "@/src/db/schema";
+import { canAccessStore, defaultDashboardPath } from "@/src/lib/authz";
 
 export default async function AnalyticsTrafficPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  if (!canAccessStore(session.user.role)) {
+    redirect(defaultDashboardPath(session.user.role));
+  }
+
   const [visitorRows, orderRows] = await Promise.all([
     db
       .select({

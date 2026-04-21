@@ -1,12 +1,23 @@
 import { eq, sql } from "drizzle-orm";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { db } from "@/src/db";
 import { orderItems, orders, products, users } from "@/src/db/schema";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueAreaChart } from "@/components/dashboard/charts/revenue-area-chart";
 import { OrdersBarChart } from "@/components/dashboard/charts/orders-bar-chart";
 import { TopProductsPieChart } from "@/components/dashboard/charts/top-products-pie-chart";
+import { canAccessStore, defaultDashboardPath } from "@/src/lib/authz";
 
 export default async function AnalyticsPage() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  if (!canAccessStore(session.user.role)) {
+    redirect(defaultDashboardPath(session.user.role));
+  }
+
   const monthlyRevenue = await db
     .select({
       label: sql<string>`to_char(date_trunc('month', ${orders.createdAt}), 'Mon YYYY')`,
